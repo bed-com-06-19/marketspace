@@ -1,47 +1,48 @@
-const express = require ('express');
- const app = express();
- const bodyParser = require('body-parser');
- const morgan =require('morgan');
- const mongoose = require('mongoose');
- const cors = require ('cors');
-
- require('dotenv/config');
-
- app.use(cors());
- app.options('*', cors());
+const express = require('express');
+const app = express();
+const bodyParser = require('body-parser');
+const morgan = require('morgan');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const authJwt = require('./helpers/jwt.js');
+const errorHandler = require('./helpers/error-handler.js');
 
 
-//middleware
- app.use(bodyParser.json());
- app.use(morgan('tiny'));
+require('dotenv').config();
 
- //routes
- const categoriesRoutes = require('./routes/categories');
- const productsRoutes = require('./routes/products');
- const usersRoutes = require('./routes/users');
- const ordersRoutes = require('./routes/orders');
+app.use(cors());
+app.options('*', cors());
 
- const api = process.env.API_URL;
- 
- app.use(`${api}/categories`,categoriesRoutes);
- app.use(`${api}/products`,productsRoutes);
- app.use(`${api}/users`,usersRoutes);
- app.use(`${api}/orders`,ordersRoutes);
+// Middleware
+app.use(bodyParser.json());
+app.use(morgan('tiny'));
+app.use(authJwt()); // Note the parentheses to invoke the middleware function
+app.use(errorHandler); // No parentheses here
 
-//database
- mongoose.connect(process.env.CONNECTION_STRING, {
-    dbName:'market_database'
+// Routes
+const categoriesRoutes = require('./routes/categories');
+const productsRoutes = require('./routes/products');
+const usersRoutes = require('./routes/users');
+const ordersRoutes = require('./routes/orders');
 
- })
- .then(() =>{ 
-    console.log('database connection is ready')
- })
+const api = process.env.API_URL;
 
- .catch((err)=>{
-     console.log(err);
- })
- 
- app.listen(5000, () =>{
-   
-    console.log('server running on port 5000');
- })
+app.use(`${api}/categories`, categoriesRoutes);
+app.use(`${api}/products`, productsRoutes);
+app.use(`${api}/users`, usersRoutes);
+app.use(`${api}/orders`, ordersRoutes);
+
+// Database
+mongoose.connect(process.env.CONNECTION_STRING, {
+  dbName: 'market_database',
+})
+  .then(() => {
+    console.log('Database connection is ready');
+  })
+  .catch((err) => {
+    console.log(err);
+  });
+
+app.listen(5000, () => {
+  console.log('Server running on port 5000');
+});
