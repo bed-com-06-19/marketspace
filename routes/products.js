@@ -57,15 +57,18 @@ router.post(`/`, async (req, res) =>{
     res.send(product);
   })
 
-  router.put('/:id', async (req, res)=>{
-   if(!mongoose.isValidObjectId(req.params.id)){
-    res.status(400).send('invalid product id ')
-   }
-   const category = await Category.findById(req.body.category);
-    if(!category) return res.status(400).send('invalid category ')
+  router.put('/:id', async (req, res) => {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+        return res.status(400).send('Invalid product id');
+    }
 
-   const product= await Product.findByIdAndUpdate(
-       req.params.id,
+    const category = await Category.findById(req.body.category);
+    if (!category) {
+        return res.status(400).send('Invalid category');
+    }
+
+    const product = await Product.findByIdAndUpdate(
+        req.params.id,
        {
          name:req.body.name,
          description:req.body.description,
@@ -82,12 +85,13 @@ router.post(`/`, async (req, res) =>{
       },
       {new: true}
 
-   )
+   );
     if (!product) {
            return res.status(484).send('The product cannot be created');
        }
-   
-})
+       res.send(product); // Send the updated product back to the client
+    });
+    
 router.delete('/:id', async (req, res) => {
    try {
        const product = await Product.findByIdAndDelete(req.params.id);
