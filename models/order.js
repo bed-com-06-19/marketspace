@@ -50,8 +50,8 @@ const orderSchema = mongoose.Schema({
   });
   
   orderSchema.set('toJSON', {
-    virtuals : true,
-
+    virtuals: true,
   });
+  
 
   exports.Order = mongoose.model('Order',orderSchema);
