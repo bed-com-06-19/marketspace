@@ -4,10 +4,12 @@ const productSchema = mongoose.Schema({
     name: {
       type:String,
       required:true,
+      trim:true
    },
    description:{
       type: String,
-      required: true
+      required: true,
+      trim: true
    },
    richDescription:{
       type: String,
@@ -51,7 +53,7 @@ const productSchema = mongoose.Schema({
     },
     isFeatured:{
       type:Boolean,
-      default: false,
+      default:true,
     },
     dateCreated:{
       type:Date,

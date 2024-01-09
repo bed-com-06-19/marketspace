@@ -7,16 +7,27 @@ const  multer  = require('multer');
 
 
 const FILE_TYPE_MAP = {
-    'image/png': 'png'
+    'image/png': 'png',
+    'image/jpeg': 'jpeg',
+    'image/jpg': 'jpg'
 }
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
+      const isvalid =  FILE_TYPE_MAP[file.mimetype];
+          let uploadError = new Error('invalid image type');
+
+          if(isvalid){
+            uploadError = null
+          }
       cb(null, 'public/uploads')
     },
     filename: function (req, file, cb) {
-      const fileName = file.originalname.split(' ').join('-');
-      cb(null, file.fileName + '-' + Date.now())
+          
+        const fileName = file.originalname.split(' ').join('-');
+        const extension = FILE_TYPE_MAP[file.mimetype];
+      
+        cb(null, `${fileName}-${Date.now()}.${extension}`)
     }
   })
   
@@ -50,6 +61,9 @@ router.get(`/`, async (req, res) =>{
 
 router.post(`/`, uploadOptions.single('image'), async (req, res) =>{
     const category = await Category.findById(req.body.category);
+
+    const isFeatured = req.body.isFeatured.trim() === 'true';
+
     if(!category) return res.status(400).send('invalid category ')
      const fileName = req.file.filename
      const basePath= `${req.protocol}://${req.get('host')}/public/uploads/`;
@@ -64,7 +78,7 @@ router.post(`/`, uploadOptions.single('image'), async (req, res) =>{
        countInStock:req.body.countInStock,
        rating:req.body.rating,
        numReviews:req.body.numReviews,
-       isFeatured:req.body.isFeatured,
+       isFeatured:isFeatured,
  
     })
  
