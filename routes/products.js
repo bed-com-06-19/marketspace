@@ -65,7 +65,9 @@ router.post(`/`, uploadOptions.single('image'), async (req, res) =>{
     const isFeatured = req.body.isFeatured.trim() === 'true';
 
     if(!category) return res.status(400).send('invalid category ')
-     const fileName = req.file.filename
+     const file = req.file;
+     if(!file) return res.status(400).send('no image in the request')
+    const fileName = req.file.filename
      const basePath= `${req.protocol}://${req.get('host')}/public/uploads/`;
     let product = new Product({
        name:req.body.name,
@@ -173,6 +175,38 @@ router.get(`/get/featured/:count`, async (req, res) => {
     }
 });
 
+router.put(
+    '/gallery-images/:id',
+    uploadOptions.array('images', 10),
+    async (req, res) => {
+        if (!mongoose.isValidObjectId(req.params.id)) {
+            return res.status(400).send('Invalid product id');
+        }
+
+        const files = req.files
+        let imagesPaths = [];
+        const basePath = `${req.protocol}://${req.get('host')}/public/uploads/`;
+
+        if (files) {
+            files.map(file => {
+                imagesPaths.push(`${basePath}${file.fileName}`);
+            })
+        }
+
+        const product = await Product.findByIdAndUpdate(
+            req.params.id,
+            {
+                images: imagesPaths,
+            },
+            { new: true }
+        );
+
+        if (!product) {
+            return res.status(404).send('The product cannot be found');
+        }
+        res.send(product);
+    }
+);
 
 
 
